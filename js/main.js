@@ -100,12 +100,9 @@ let createPhotos = function (photo) {
 
 
 // функцию заполнения блока DOM-элементами на основе массива JS-объектов
-let renderPhotos = function () {
-  const PHOTOS_AMOUNT = 25; // количество фотографий с описаниями (объектов)
-
+let renderPhotos = function (photos) {
   let photoListElement = document.querySelector(`.pictures`);
-
-  let photos = generateDescriptionToPhotos(PHOTOS_AMOUNT);
+  // let photos = generateDescriptionToPhotos(PHOTOS_AMOUNT);
 
   // отрисовка шаблона в документ
   let fragment = document.createDocumentFragment();
@@ -117,4 +114,60 @@ let renderPhotos = function () {
   photoListElement.appendChild(fragment);
 };
 
-renderPhotos();
+
+let showPhoto = function () {
+  const PHOTOS_AMOUNT = 25; // количество фотографий с описаниями (объектов)
+  let bigPicture = document.querySelector(`.big-picture`);
+  let url = bigPicture.querySelector(`.big-picture__img`).querySelector(`img`);
+  let description = bigPicture.querySelector(`.social__caption`);
+  let likesCount = bigPicture.querySelector(`.likes-count`);
+  let socialCommentCount = bigPicture.querySelector(`.social__comment-count`);
+  let commentsCount = bigPicture.querySelector(`.comments-count`);
+  let commentsLoader = bigPicture.querySelector(`.comments-loader`);
+  let socialComments = bigPicture.querySelector(`.social__comments`); // список комментариев
+  let defaultComments = bigPicture.querySelectorAll(`.social__comment`); // исходные комментарии
+  let fragment = document.createDocumentFragment();
+
+  let photos = generateDescriptionToPhotos(PHOTOS_AMOUNT);
+  renderPhotos(photos);
+
+  bigPicture.classList.remove(`hidden`); // отображаем полноразмерное фото
+  url.setAttribute(`src`, photos[0].url); // адрес изображения
+  description.textContent = photos[0].description; // описание фотографии
+  likesCount.textContent = photos[0].likes; // количество лайков
+  commentsCount.textContent = photos[0].comments.length; // количество комментариев
+
+  defaultComments.forEach(function (defaultComment) { // удаляем исходные комментарии
+    defaultComment.parentNode.removeChild(defaultComment);
+  });
+
+  photos[0].comments.forEach(function (comment) { // добавляем новые комментарии к фото
+    let socialComment = document.createElement(`li`);
+    let img = document.createElement(`img`);
+    let paragraph = document.createElement(`p`);
+
+    fragment.appendChild(socialComment);
+    socialComment.classList.add(`social__comment`);
+
+    socialComment.appendChild(img);
+    img.classList.add(`social__picture`);
+    img.setAttribute(`src`, comment.avatar);
+    img.setAttribute(`alt`, comment.name);
+    img.setAttribute(`width`, 35);
+    img.setAttribute(`height`, 35);
+
+    socialComment.appendChild(paragraph);
+    paragraph.classList.add(`social__text`);
+    paragraph.textContent = comment.message;
+  });
+
+  socialComments.appendChild(fragment);
+
+  socialCommentCount.classList.add(`hidden`); // прячем блок счетчика комментариев
+  commentsLoader.classList.add(`hidden`); // прячем блок загрузки новых комментариев
+  document.querySelector(`body`).classList.add(`modal-open`);
+};
+
+showPhoto();
+
+
